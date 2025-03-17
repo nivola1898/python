@@ -1,0 +1,32 @@
+import streamlit as st
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+
+# Datos de ejemplo (simula los del fontanero/portero)
+data = {
+    'horas_trabajo': [40, 35, 50, 45, 30],
+    'horas_sueño': [6, 7, 5, 6, 8],
+    'dieta': [3, 4, 2, 3, 5],  # 1 (mala) - 5 (excelente)
+    'lesionado': [1, 0, 1, 1, 0]  # 1=Sí, 0=No
+}
+df = pd.DataFrame(data)
+
+# Entrena el modelo
+model = LogisticRegression()
+model.fit(df[['horas_trabajo', 'horas_sueño', 'dieta']], df['lesionado'])
+
+# Interfaz de usuario en Streamlit
+st.title('Riesgo de Lesiones - Harborough Town FC')
+
+horas_trabajo = st.slider('Horas de trabajo/semana', 0, 60, 40)
+horas_sueño = st.slider('Horas de sueño/noche', 0, 12, 6)
+dieta = st.slider('Calidad de dieta (1-5)', 1, 5, 3)
+
+# Predice riesgo
+riesgo = model.predict_proba([[horas_trabajo, horas_sueño, dieta]])[0][1] * 100
+st.write(f"**Riesgo de lesión:** {riesgo:.1f}%")
+
+if riesgo > 50:
+    st.error('¡Alerta! Reducir horas de trabajo o mejorar dieta.')
+else:
+    st.success('Bajo riesgo. Mantener hábitos.')
